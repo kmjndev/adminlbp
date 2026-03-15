@@ -862,28 +862,22 @@ const savedMigVer = parseInt(localStorage.getItem('lbp_migration') || '0');
 if (savedMigVer < MIGRATION_VERSION) {
   try {
     const raw = localStorage.getItem('lbp_st');
-    if (raw) {
-      const old = JSON.parse(raw);
-      const cleanedState = {
-        user: null,
-        ads: [],
-        users: [ADMIN_USER],
-        convs: [],
-        notifs: [],
-        favs: [],
-        reports: [],
-        reviews: [],
-        logs: [],
-        activeConv: null
-      };
-      // Keep only admin user
-      if (old.users) {
-        const adminU = old.users.find(u => u.email === 'admin@lebonplan.fr');
-        if (adminU) cleanedState.users = [{ ...ADMIN_USER }];
-      }
-      localStorage.setItem('lbp_st', JSON.stringify(cleanedState));
-    }
-  } catch(e) { localStorage.removeItem('lbp_st'); }
+    const state = raw ? JSON.parse(raw) : {};
+
+    // Reset specified fields, but preserve others like settings, staff, etc.
+    state.user = null;
+    state.ads = [];
+    state.users = [ADMIN_USER]; // Keep only the admin user
+    state.convs = [];
+    state.notifs = [];
+    state.favs = [];
+    state.reports = [];
+    state.reviews = [];
+    state.activeConv = null;
+    // Logs and other admin settings are preserved.
+
+    localStorage.setItem('lbp_st', JSON.stringify(state));
+  } catch(e) { localStorage.removeItem('lbp_st'); /* If parsing fails, state is corrupt */ }
   localStorage.setItem('lbp_migration', String(MIGRATION_VERSION));
 }
 // Clean up old keys that are no longer needed
