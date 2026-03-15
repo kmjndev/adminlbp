@@ -34,7 +34,7 @@
 
 /* ═══ BASE ═══ */
 html{scroll-behavior:smooth}
-body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--noir);min-height:100vh;line-height:1.5;cursor:default}
+body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--noir);min-height:100vh;line-height:1.5;cursor:default;visibility:hidden}
 a{text-decoration:none;color:inherit;cursor:pointer}
 button{cursor:pointer;font-family:'Outfit',sans-serif;background:none;border:none;color:inherit;line-height:1}
 input,select,textarea{font-family:'Outfit',sans-serif;color:var(--noir)}
@@ -553,6 +553,41 @@ footer{border-top:2px solid var(--noir);margin-top:80px;background:var(--noir);c
 <div id="maintBanner" class="maint-banner-strip">⚠ MODE MAINTENANCE ACTIF — <a onclick="go('admin');setTimeout(()=>aPane('settings',document.querySelector('[onclick*=settings]')),100)">Désactiver →</a></div>
 
 <!-- ═══ HEADER ═══ -->
+
+<!-- ADMIN LOGIN OVERLAY -->
+<div id="adminLoginOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:var(--noir);color:#fff;flex-direction:column;align-items:center;justify-content:center;padding:24px">
+  <div style="width:100%;max-width:360px">
+    <!-- Logo -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:48px;justify-content:center">
+      <div style="width:8px;height:8px;background:var(--rouge);flex-shrink:0"></div>
+      <span style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.02em;color:#fff">LeBon<span style="color:var(--rouge)">Plan</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase">Admin</span></span>
+    </div>
+    <!-- Title -->
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.04em;margin-bottom:6px;line-height:1">Accès<br>administrateur</div>
+    <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:32px">Réservé au personnel autorisé.</p>
+    <!-- Form -->
+    <div id="alErr" style="display:none;font-size:12px;color:#ff6b6b;background:rgba(212,43,43,.15);border-left:3px solid var(--rouge);padding:9px 13px;margin-bottom:16px;font-weight:600"></div>
+    <div style="margin-bottom:14px">
+      <input id="alEmail" type="email" placeholder="Email administrateur" autocomplete="username"
+        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:13px 16px;font-size:14px;color:#fff;outline:none;font-family:'Outfit',sans-serif;transition:border-color .18s"
+        onfocus="this.style.borderColor='var(--rouge)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
+        onkeydown="if(event.key==='Enter')doAdminLogin()">
+    </div>
+    <div style="margin-bottom:20px">
+      <input id="alPw" type="password" placeholder="Mot de passe" autocomplete="current-password"
+        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:13px 16px;font-size:14px;color:#fff;outline:none;font-family:'Outfit',sans-serif;transition:border-color .18s"
+        onfocus="this.style.borderColor='var(--rouge)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
+        onkeydown="if(event.key==='Enter')doAdminLogin()">
+    </div>
+    <button onclick="doAdminLogin()"
+      style="width:100%;background:var(--rouge);color:#fff;border:none;padding:14px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .18s"
+      onmouseover="this.style.background='var(--rouge2)'" onmouseout="this.style.background='var(--rouge)'">
+      Connexion →
+    </button>
+    <p style="font-size:11px;color:rgba(255,255,255,.2);text-align:center;margin-top:20px">LeBonPlan · Panel d'administration</p>
+  </div>
+</div>
+
 <header>
   <div class="hbar">
     <a class="logo" onclick="go('home')">
@@ -1535,7 +1570,10 @@ function go(p) {
   closeAllDD();
   const guarded = ['post-ad','messages','profile','favorites'];
   if (guarded.includes(p) && !S.user) { openM('login'); return; }
-  if (p === 'admin' && (!S.user || S.user.role !== 'admin')) { toast('Accès réservé aux admins', 'err'); return; }
+  if (p === 'admin') {
+    if (!IS_ADMIN_DOMAIN) { toast('Accès non autorisé depuis cette URL', 'err'); return; }
+    if (!S.user || S.user.role !== 'admin') { toast('Accès réservé aux admins', 'err'); return; }
+  }
 
   // Contact requires login
   if (p === 'contact' && !S.user) { openM('login'); return; }
@@ -1552,6 +1590,10 @@ function go(p) {
   el.classList.add('on');
   window.scrollTo(0, 0);
   if (p === 'home') renderHome();
+  // Extra guard: clear admin page if on wrong domain
+  if (p !== 'admin' && !IS_ADMIN_DOMAIN) {
+    document.getElementById('page-admin')?.classList.remove('on');
+  }
   if (p === 'listings') renderList();
   if (p === 'messages') renderMessages();
   if (p === 'profile') renderProfile();
@@ -2169,7 +2211,7 @@ function updateAuthUI() {
     const nm = document.getElementById('uNm'); if (nm) nm.textContent = u.first || u.name;
     const uddNm = document.getElementById('uddNm'); if (uddNm) uddNm.textContent = u.name;
     const uddEm = document.getElementById('uddEm'); if (uddEm) uddEm.textContent = u.email;
-    const al = document.getElementById('adminLink'); if (al) al.style.display = u.role === 'admin' ? 'block' : 'none';
+    const al = document.getElementById('adminLink'); if (al) al.style.display = (u.role === 'admin' && IS_ADMIN_DOMAIN) ? 'block' : 'none';
   }
   renderNotifs(); updateMsgDot(); updateRepBadge(); updateContactBadge();
 }
@@ -2953,6 +2995,8 @@ function esc(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').repla
 // COOKIES CONSENT
 // ═══════════════════════════════════════════════════════════
 const COOKIE_VERSION = '2';
+const ADMIN_URL = 'https://kmjndev.github.io/adminlbp';
+const IS_ADMIN_DOMAIN = true; // admin site
 function initCookies() {
   const consent = localStorage.getItem('lbp_cookies');
   const version = localStorage.getItem('lbp_cookies_v');
@@ -3312,6 +3356,53 @@ function applyAnnouncements() {
   }
 }
 
+// ═══ ADMIN SITE — show login or dashboard directly ═══
+function initAdminSite() {
+  // If already logged in as admin, go straight to dashboard
+  if (S.user && S.user.role === 'admin') {
+    document.body.style.visibility = 'visible';
+    go('admin');
+    return;
+  }
+  // Show full-screen admin login
+  document.body.style.visibility = 'visible';
+  showAdminLogin();
+}
+
+function showAdminLogin() {
+  // Hide everything, show only the admin login overlay
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  const overlay = document.getElementById('adminLoginOverlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
+function doAdminLogin() {
+  const em = document.getElementById('alEmail').value.trim();
+  const pw = document.getElementById('alPw').value;
+  const err = document.getElementById('alErr');
+  err.style.display = 'none';
+  const limitMsg = checkLoginRateLimit();
+  if (limitMsg) { err.textContent = limitMsg; err.style.display = 'block'; return; }
+  if (!em || !pw) { err.textContent = 'Remplissez tous les champs.'; err.style.display = 'block'; return; }
+  const u = S.users.find(x => x.email === em && x.password === pw);
+  if (!u) {
+    recordFailedLogin();
+    err.textContent = 'Identifiants incorrects.'; err.style.display = 'block';
+    addLog('wrn', 'Tentative connexion admin échouée : ' + em);
+    return;
+  }
+  if (u.role !== 'admin') { err.textContent = 'Accès réservé aux administrateurs.'; err.style.display = 'block'; return; }
+  if (u.status === 'banned') { err.textContent = 'Compte suspendu.'; err.style.display = 'block'; return; }
+  resetLoginAttempts();
+  S.user = { ...u };
+  saveSt();
+  document.getElementById('adminLoginOverlay').style.display = 'none';
+  updateAuthUI();
+  go('admin');
+  toast('Bienvenue ' + (u.first || u.name) + ' !', 'ok');
+  addLog('inf', 'Connexion admin : ' + em);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Google setup
   // GCID hardcoded — update admin display
@@ -3344,8 +3435,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cookie consent
   initCookies();
-  // Apply admin announcements
   applyAnnouncements();
+  // Admin site: show login or dashboard
+  initAdminSite();
 
   window.addEventListener('scroll',()=>document.querySelector('header')?.classList.toggle('scrolled',window.scrollY>2),{passive:true});
 });
