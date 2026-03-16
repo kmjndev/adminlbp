@@ -499,36 +499,96 @@ footer{border-top:2px solid var(--noir);margin-top:80px;background:var(--noir);c
 <!-- ═══ HEADER ═══ -->
 
 <!-- ADMIN LOGIN OVERLAY -->
-<div id="adminLoginOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:var(--noir);color:#fff;flex-direction:column;align-items:center;justify-content:center;padding:24px">
-  <div style="width:100%;max-width:360px">
+<style>
+/* ═══ STAFF LOGIN ═══ */
+.staff-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.staff-type-btn{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:14px 8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:all .18s;text-align:center}
+.staff-type-btn:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8);background:rgba(255,255,255,.08)}
+.staff-type-btn.sel{border-color:var(--rouge);color:#fff;background:rgba(212,43,43,.15)}
+.staff-type-btn .stb-ico{font-size:20px;display:block;margin-bottom:5px}
+
+/* ═══ SAVE CONFIRM EMBED ═══ */
+#saveConfirmEmbed{display:none;position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:7000;background:var(--noir);color:#fff;border:2px solid var(--rouge);padding:18px 28px;min-width:380px;max-width:90vw;box-shadow:0 8px 40px rgba(0,0,0,.45);animation:slideUp .22s ease}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#saveConfirmEmbed .sce-title{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--rouge);margin-bottom:8px}
+#saveConfirmEmbed .sce-msg{font-size:14px;font-weight:600;margin-bottom:14px;line-height:1.4}
+#saveConfirmEmbed .sce-btns{display:flex;gap:10px}
+#saveConfirmEmbed .sce-ok{background:var(--rouge);color:#fff;border:none;padding:9px 22px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;flex:1}
+#saveConfirmEmbed .sce-ok:hover{background:var(--rouge2)}
+#saveConfirmEmbed .sce-cancel{background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.15);padding:9px 22px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif}
+#saveConfirmEmbed .sce-cancel:hover{color:#fff;border-color:rgba(255,255,255,.4)}
+
+/* ═══ ADMIN HEADER BAR ═══ */
+.adm-user-bar{display:flex;align-items:center;gap:12px;padding:8px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:0}
+.adm-user-av{width:32px;height:32px;border-radius:50%;background:var(--rouge);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+.adm-user-nm{font-size:13px;font-weight:700;color:#fff;flex:1}
+.adm-user-role{font-size:10px;color:rgba(255,255,255,.4);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.adm-logout-btn{background:rgba(212,43,43,.2);color:rgba(255,100,100,.9);border:1px solid rgba(212,43,43,.3);padding:6px 13px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;white-space:nowrap}
+.adm-logout-btn:hover{background:rgba(212,43,43,.4);color:#fff}
+</style>
+
+<div id="adminLoginOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:var(--noir);color:#fff;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto">
+  <div style="width:100%;max-width:420px">
     <!-- Logo -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:48px;justify-content:center">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:40px;justify-content:center">
       <div style="width:8px;height:8px;background:var(--rouge);flex-shrink:0"></div>
       <span style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.02em;color:#fff">LeBon<span style="color:var(--rouge)">Plan</span> <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase">Admin</span></span>
     </div>
     <!-- Title -->
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.04em;margin-bottom:6px;line-height:1">Accès<br>administrateur</div>
-    <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:32px">Réservé au personnel autorisé.</p>
-    <!-- Form -->
-    <div id="alErr" style="display:none;font-size:12px;color:#ff6b6b;background:rgba(212,43,43,.15);border-left:3px solid var(--rouge);padding:9px 13px;margin-bottom:16px;font-weight:600"></div>
-    <div style="margin-bottom:14px">
-      <input id="alEmail" type="email" placeholder="Email administrateur" autocomplete="username"
-        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:13px 16px;font-size:14px;color:#fff;outline:none;font-family:'Outfit',sans-serif;transition:border-color .18s"
-        onfocus="this.style.borderColor='var(--rouge)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
-        onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:.04em;margin-bottom:6px;line-height:1">Accès<br>panel staff</div>
+    <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px">Réservé au personnel autorisé. Sélectionnez votre type de staff.</p>
+
+    <!-- Step 1 : Staff type -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:10px">Étape 1 — Votre rôle</div>
+    <div class="staff-type-grid" id="staffTypeGrid">
+      <button class="staff-type-btn" data-type="admin" onclick="selectStaffType('admin',this)">
+        <span class="stb-ico">👑</span>Direction
+      </button>
+      <button class="staff-type-btn" data-type="moderateur" onclick="selectStaffType('moderateur',this)">
+        <span class="stb-ico">🛡</span>Modérateur
+      </button>
+      <button class="staff-type-btn" data-type="dev" onclick="selectStaffType('dev',this)">
+        <span class="stb-ico">💻</span>Développeur
+      </button>
     </div>
-    <div style="margin-bottom:20px">
-      <input id="alPw" type="password" placeholder="Mot de passe" autocomplete="current-password"
-        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:13px 16px;font-size:14px;color:#fff;outline:none;font-family:'Outfit',sans-serif;transition:border-color .18s"
-        onfocus="this.style.borderColor='var(--rouge)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
-        onkeydown="if(event.key==='Enter')doAdminLogin()">
+
+    <!-- Step 2 : Credentials -->
+    <div id="alStep2" style="display:none">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:12px">Étape 2 — Vos identifiants</div>
+      <div id="alErr" style="display:none;font-size:12px;color:#ff6b6b;background:rgba(212,43,43,.15);border-left:3px solid var(--rouge);padding:9px 13px;margin-bottom:16px;font-weight:600"></div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);display:block;margin-bottom:7px">Email ou identifiant</label>
+        <input id="alEmail" type="text" placeholder="email@lebonplan.fr ou @identifiant" autocomplete="username"
+          style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:13px 16px;font-size:14px;color:#fff;outline:none;font-family:'Outfit',sans-serif;transition:border-color .18s"
+          onfocus="this.style.borderColor='var(--rouge)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
+          onkeydown="if(event.key==='Enter')document.getElementById('alPw').focus()">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);display:block;margin-bottom:7px">Mot de passe</label>
+        <input id="alPw" type="password" placeholder="Mot de passe" autocomplete="current-password"
+          style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:13px 16px;font-size:14px;color:#fff;outline:none;font-family:'Outfit',sans-serif;transition:border-color .18s"
+          onfocus="this.style.borderColor='var(--rouge)'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
+          onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <button onclick="doAdminLogin()"
+        style="width:100%;background:var(--rouge);color:#fff;border:none;padding:14px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .18s"
+        onmouseover="this.style.background='var(--rouge2)'" onmouseout="this.style.background='var(--rouge)'">
+        Connexion →
+      </button>
+      <button onclick="resetStaffTypeSelection()" style="width:100%;background:transparent;border:none;color:rgba(255,255,255,.3);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:12px;padding:6px">← Changer de rôle</button>
     </div>
-    <button onclick="doAdminLogin()"
-      style="width:100%;background:var(--rouge);color:#fff;border:none;padding:14px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .18s"
-      onmouseover="this.style.background='var(--rouge2)'" onmouseout="this.style.background='var(--rouge)'">
-      Connexion →
-    </button>
-    <p style="font-size:11px;color:rgba(255,255,255,.2);text-align:center;margin-top:20px">LeBonPlan · Panel d'administration</p>
+
+    <p style="font-size:11px;color:rgba(255,255,255,.15);text-align:center;margin-top:24px">LeBonPlan · Panel d'administration · Accès restreint</p>
+  </div>
+</div>
+
+<!-- SAVE CONFIRM EMBED -->
+<div id="saveConfirmEmbed">
+  <div class="sce-title">⚠ Action requise</div>
+  <div class="sce-msg" id="saveConfirmMsg">Voulez-vous sauvegarder ces modifications ?</div>
+  <div class="sce-btns">
+    <button type="button" class="sce-ok" id="saveConfirmOkBtn" onclick="event.preventDefault();event.stopPropagation();executePendingAction();return false;">💾 Sauvegarder</button>
+    <button type="button" class="sce-cancel" onclick="event.preventDefault();event.stopPropagation();dismissSaveConfirm();return false;">Annuler</button>
   </div>
 </div>
 
@@ -585,24 +645,36 @@ footer{border-top:2px solid var(--noir);margin-top:80px;background:var(--noir);c
           <div class="adm-logo-sub">Administration</div>
         </div>
       </a>
+      <!-- Staff identity bar -->
+      <div class="adm-user-bar" id="admUserBar">
+        <div class="adm-user-av" id="admUserAv">?</div>
+        <div style="flex:1;min-width:0">
+          <div class="adm-user-nm" id="admUserNm">—</div>
+          <div class="adm-user-role" id="admUserRole">—</div>
+        </div>
+        <button class="adm-logout-btn" onclick="adminLogout()" title="Se déconnecter">⏻</button>
+      </div>
       <div class="adm-sep">Général</div>
-      <div class="adm-nav on" onclick="aPane('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="adm-nav on" id="nav-dashboard" onclick="aPane('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
       <div class="adm-sep">Contenu</div>
-      <div class="adm-nav" onclick="aPane('ads',this)"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Annonces</div>
+      <div class="adm-nav" id="nav-ads" onclick="aPane('ads',this)"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>Annonces</div>
       <div class="adm-nav" id="navReports" onclick="aPane('reports',this)"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Signalements<span class="nbdg" id="repBdg" style="display:none">0</span></div>
-      <div class="adm-nav" onclick="aPane('reviews',this)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Avis</div>
+      <div class="adm-nav" id="nav-reviews" onclick="aPane('reviews',this)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Avis</div>
       <div class="adm-sep">Utilisateurs</div>
-      <div class="adm-nav" onclick="aPane('users',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Comptes</div>
-      <div class="adm-nav" onclick="aPane('messages',this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messagerie</div>
+      <div class="adm-nav" id="nav-users" onclick="aPane('users',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Comptes</div>
+      <div class="adm-nav" id="nav-messages" onclick="aPane('messages',this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messagerie</div>
       <div class="adm-nav" id="navContacts" onclick="aPane('contacts',this)"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Formulaires<span class="nbdg" id="contactBdg" style="display:none">0</span></div>
-      <div class="adm-nav" onclick="aPane('announcements',this)"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Annonces admin</div>
-      <div class="adm-sep">Équipe</div>
-      <div class="adm-nav" onclick="aPane('staff',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Comptes Staff</div>
-      <div class="adm-sep">Système</div>
-      <div class="adm-nav" onclick="aPane('system',this)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Infrastructure</div>
-      <div class="adm-nav" onclick="aPane('logs',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Journaux</div>
-      <div class="adm-nav" onclick="aPane('settings',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Paramètres</div>
-      <div class="adm-foot"><div class="adm-nav" style="border-left:none" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Retour au site</div></div>
+      <div class="adm-nav" id="nav-announcements" onclick="aPane('announcements',this)"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Annonces admin</div>
+      <div class="adm-sep" id="sepEquipe">Équipe</div>
+      <div class="adm-nav" id="nav-staff" onclick="aPane('staff',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Comptes Staff</div>
+      <div class="adm-sep" id="sepSysteme">Système</div>
+      <div class="adm-nav" id="nav-system" onclick="aPane('system',this)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Infrastructure</div>
+      <div class="adm-nav" id="nav-logs" onclick="aPane('logs',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Journaux</div>
+      <div class="adm-nav" id="nav-settings" onclick="aPane('settings',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Paramètres</div>
+      <div class="adm-foot">
+        <div class="adm-nav" style="border-left:none" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Retour au site</div>
+        <div class="adm-nav" style="border-left:none;color:rgba(212,43,43,.8)" onclick="adminLogout()"><svg viewBox="0 0 24 24" style="stroke:rgba(212,43,43,.8)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Se déconnecter</div>
+      </div>
     </div>
     <div class="adm-main">
       <div class="adm-pane on" id="ap-dashboard">
@@ -910,6 +982,7 @@ const ADMIN_USER = {
 const saved = loadSt();
 const S = {
   user: saved.user || null,
+  adminUser: saved.adminUser || null, // panel staff session — séparé du compte site
   ads: saved.ads || [],
   users: saved.users || [ADMIN_USER],
   convs: saved.convs || [],
@@ -1094,7 +1167,7 @@ function go(p) {
   if (guarded.includes(p) && !S.user) { openM('login'); return; }
   if (p === 'admin') {
     if (!IS_ADMIN_DOMAIN) { toast('Accès non autorisé depuis cette URL', 'err'); return; }
-    if (!S.user || S.user.role !== 'admin') { toast('Accès réservé aux admins', 'err'); return; }
+    if (!S.adminUser && (!S.user || S.user.role !== 'admin')) { toast('Accès réservé aux admins', 'err'); return; }
   }
 
   // Contact requires login
@@ -1102,7 +1175,8 @@ function go(p) {
 
   // Block non-admins if maintenance is on
   const legalPages = ['cgu','confidentialite','cookies','mentions','contact'];
-  if (S.settings.maintenance && (!S.user || S.user.role !== 'admin') && !legalPages.includes(p)) {
+  const isAdminOrStaff = S.adminUser || (S.user && S.user.role === 'admin');
+  if (S.settings.maintenance && !isAdminOrStaff && !legalPages.includes(p)) {
     showMaintenanceScreen(); return;
   }
 
@@ -1129,6 +1203,10 @@ function go(p) {
 function requireAuth(cb) { S.user ? cb() : openM('login'); }
 
 function aPane(id, el) {
+  // Check permission
+  if (window._staffPerms && !window._staffPerms.includes(id)) {
+    toast('Accès non autorisé pour votre rôle', 'err'); return;
+  }
   document.querySelectorAll('.adm-pane').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.adm-nav').forEach(n => n.classList.remove('on'));
   const pane = document.getElementById('ap-' + id);
@@ -2121,19 +2199,34 @@ function deleteMyAd() {
   const ad = S.ads.find(a => a.id === S.currentAdId);
   if (!ad) return;
   const isOwner = S.user && S.user.email === ad.sellerEmail;
-  const isAdmin = S.user && S.user.role === 'admin';
+  const isAdmin = S.adminUser || (S.user && S.user.role === 'admin');
   if (!isOwner && !isAdmin) { toast('Non autorisé', 'err'); return; }
-  if (!confirm('Supprimer définitivement cette annonce ?')) return;
-  ad.status = 'removed';
-  addLog('wrn', `Annonce "${ad.title}" supprimée par ${S.user.name}`);
-  saveSt(); renderHome(); toast('Annonce supprimée', 'ok');
-  go('listings');
+  requireSave(
+    `Supprimer définitivement l'annonce "${ad.title}" ?`,
+    () => {
+      ad.status = 'removed';
+      const who = S.adminUser?.name || S.user?.name || 'admin';
+      addLog('wrn', `Annonce "${ad.title}" supprimée par ${who}`);
+      saveSt(); renderHome();
+      toast('Annonce supprimée', 'ok');
+      go('listings');
+    },
+    'Supprimer'
+  );
 }
 function toggleAdSt(id) {
   const a = S.ads.find(x=>x.id===id); if(!a) return;
-  a.status = a.status==='removed'?'active':'removed';
-  addLog('wrn', `Annonce "${a.title}" ${a.status==='removed'?'retirée':'restaurée'} par admin`);
-  saveSt(); renderAdmAds(); renderHome(); toast(a.status==='removed'?'Annonce retirée':'Annonce restaurée', a.status==='removed'?'err':'ok');
+  const willRemove = a.status !== 'removed';
+  requireSave(
+    `${willRemove ? 'Retirer' : 'Restaurer'} l'annonce "${a.title}" ?`,
+    () => {
+      a.status = willRemove ? 'removed' : 'active';
+      addLog('wrn', `Annonce "${a.title}" ${willRemove?'retirée':'restaurée'} par ${window._staffRole||'admin'}`);
+      saveSt(); renderAdmAds(); renderHome();
+      toast(willRemove ? 'Annonce retirée' : 'Annonce restaurée', willRemove ? 'err' : 'ok');
+    },
+    willRemove ? 'Retirer' : 'Restaurer'
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2163,12 +2256,30 @@ function renderAdmRep() {
 }
 function resolveRep(id) {
   const r = S.reports.find(x=>x.id===id); if(!r) return;
-  r.status = r.status==='pending'?'resolved':'pending';
-  addLog('inf', `Signalement ${r.status==='resolved'?'résolu':'rouvert'} : "${r.adTitle}"`);
-  saveSt(); renderAdmRep(); updateRepBadge(); toast('Mis à jour','ok');
+  const willResolve = r.status === 'pending';
+  requireSave(
+    `${willResolve ? 'Marquer comme résolu' : 'Rouvrir'} le signalement sur "${r.adTitle}" ?`,
+    () => {
+      r.status = willResolve ? 'resolved' : 'pending';
+      addLog('inf', `Signalement "${r.adTitle}" ${r.status==='resolved'?'résolu':'rouvert'} par ${window._staffRole||'admin'}`);
+      saveSt(); renderAdmRep(); updateRepBadge();
+      toast(willResolve ? 'Résolu ✓' : 'Rouvert', 'ok');
+    },
+    willResolve ? 'Résoudre' : 'Rouvrir'
+  );
 }
 function removeAdByRep(adId) {
-  const a = S.ads.find(x=>x.id===adId); if(a){ a.status='removed'; addLog('wrn',`Annonce "${a.title}" retirée suite à signalement`); saveSt(); renderAdmRep(); renderAdmAds(); renderHome(); toast('Annonce retirée','ok'); }
+  const a = S.ads.find(x=>x.id===adId); if(!a) return;
+  requireSave(
+    `Retirer l'annonce "${a.title}" suite à signalement ? Elle sera masquée du site.`,
+    () => {
+      a.status = 'removed';
+      addLog('wrn', `Annonce "${a.title}" retirée suite à signalement par ${window._staffRole||'admin'}`);
+      saveSt(); renderAdmRep(); renderAdmAds(); renderHome();
+      toast('Annonce retirée', 'ok');
+    },
+    'Retirer annonce'
+  );
 }
 function updateRepBadge() {
   const n = S.reports.filter(r=>r.status==='pending').length;
@@ -2195,9 +2306,17 @@ function renderAdmRev() {
   }</tbody>`;
 }
 function deleteReview(id) {
-  S.reviews = S.reviews.filter(r=>r.id!==id);
-  addLog('wrn','Avis supprimé par admin');
-  saveSt(); renderAdmRev(); toast('Avis supprimé','ok');
+  const r = S.reviews.find(x=>x.id===id);
+  requireSave(
+    `Supprimer l'avis de ${r?.authorName||'cet utilisateur'} (${r?.stars||'?'}★) ?`,
+    () => {
+      S.reviews = S.reviews.filter(r=>r.id!==id);
+      addLog('wrn', 'Avis supprimé par ' + (window._staffRole||'admin'));
+      saveSt(); renderAdmRev();
+      toast('Avis supprimé', 'ok');
+    },
+    'Supprimer avis'
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2230,46 +2349,77 @@ function renderAdmUsers() {
   }</tbody>`;
 }
 function admPurgeAds() {
-  if (!confirm('Supprimer TOUTES les annonces de la plateforme ? Cette action est irréversible.')) return;
-  const count = S.ads.length;
-  S.ads = [];
-  S.reports = [];
-  S.convs = [];
-  S.favs = [];
-  addLog('wrn', `${count} annonces supprimées par admin`);
-  saveSt(); renderHome(); renderDash(); renderAdmAds(); toast(`${count} annonces supprimées`, 'ok');
+  requireSave(
+    '⚠️ IRRÉVERSIBLE — Supprimer TOUTES les annonces, signalements, conversations et favoris ?',
+    () => {
+      const count = S.ads.length;
+      S.ads = []; S.reports = []; S.convs = []; S.favs = [];
+      addLog('wrn', `${count} annonces supprimées par ${window._staffRole||'admin'}`);
+      saveSt(); renderHome(); renderDash(); renderAdmAds();
+      toast(`${count} annonces supprimées`, 'ok');
+    },
+    'Supprimer tout'
+  );
 }
 function admPurgeUsers() {
-  if (!confirm('Supprimer tous les comptes sauf admin ? Cette action est irréversible.')) return;
-  const count = S.users.filter(u => u.email !== 'admin@lebonplan.fr').length;
-  S.users = [{ ...ADMIN_USER }];
-  S.ads = S.ads.filter(a => a.sellerEmail === 'admin@lebonplan.fr');
-  S.convs = [];
-  S.reviews = [];
-  addLog('wrn', `${count} comptes supprimés par admin`);
-  saveSt(); renderAdmUsers(); renderDash(); toast(`${count} comptes supprimés`, 'ok');
+  requireSave(
+    '⚠️ IRRÉVERSIBLE — Supprimer TOUS les comptes utilisateurs (sauf admin) ?',
+    () => {
+      const count = S.users.filter(u => u.email !== 'admin@lebonplan.fr').length;
+      S.users = [{ ...ADMIN_USER }];
+      S.ads = S.ads.filter(a => a.sellerEmail === 'admin@lebonplan.fr');
+      S.convs = []; S.reviews = [];
+      addLog('wrn', `${count} comptes supprimés par ${window._staffRole||'admin'}`);
+      saveSt(); renderAdmUsers(); renderDash();
+      toast(`${count} comptes supprimés`, 'ok');
+    },
+    'Supprimer comptes'
+  );
 }
 function admPurgeAll() {
-  if (!confirm('TOUT réinitialiser ? Annonces, comptes, messages, signalements, avis — tout sera effacé. Seul le compte admin sera conservé.')) return;
-  S.ads = []; S.users = [{ ...ADMIN_USER }]; S.convs = []; S.notifs = []; S.favs = [];
-  S.reports = []; S.reviews = []; S.logs = [];
-  if (S.user && S.user.email !== 'admin@lebonplan.fr') { S.user = null; }
-  addLog('wrn', 'Réinitialisation complète par admin');
-  saveSt(); updateAuthUI(); renderHome(); renderDash(); renderAdmAds(); renderAdmUsers(); toast('Plateforme réinitialisée', 'ok');
+  requireSave(
+    '💥 IRRÉVERSIBLE — Réinitialiser TOUT (annonces, comptes, messages, avis, logs) ? Seul le compte admin sera conservé.',
+    () => {
+      S.ads = []; S.users = [{ ...ADMIN_USER }]; S.convs = []; S.notifs = []; S.favs = [];
+      S.reports = []; S.reviews = []; S.logs = []; S.contacts = []; S.announcements = [];
+      addLog('wrn', 'Réinitialisation complète par ' + (window._staffRole||'admin'));
+      saveSt(); updateAuthUI(); renderHome(); renderDash(); renderAdmAds(); renderAdmUsers();
+      toast('Plateforme réinitialisée', 'ok');
+    },
+    'Tout réinitialiser'
+  );
 }
 function toggleBan(em) {
-  const u = S.users.find(x=>x.email===em); if(!u||u.email==='admin@lebonplan.fr') return;
-  u.status = u.status==='banned'?'active':'banned';
-  if (S.user?.email===em) { S.user.status = u.status; }
-  addLog('wrn',`${u.name} ${u.status==='banned'?'banni':'débanni'} par admin`);
-  saveSt(); renderAdmUsers(); toast(`${u.name} ${u.status==='banned'?'banni':'débanni'}`, u.status==='banned'?'err':'ok');
+  const u = S.users.find(x => x.email === em);
+  if (!u || u.email === 'admin@lebonplan.fr') return;
+  const willBan = u.status !== 'banned';
+  requireSave(
+    `${willBan ? 'Bannir' : 'Débannir'} le compte de ${u.name} (${em}) ?`,
+    () => {
+      u.status = willBan ? 'banned' : 'active';
+      if (S.user?.email === em) S.user.status = u.status;
+      addLog('wrn', `${u.name} ${willBan ? 'banni' : 'débanni'} par ${window._staffRole||'admin'}`);
+      saveSt(); renderAdmUsers();
+      toast(`${u.name} ${willBan ? 'banni' : 'débanni'}`, willBan ? 'err' : 'ok');
+    },
+    willBan ? 'Bannir' : 'Débannir'
+  );
 }
 function toggleAdmRole(em) {
-  const u = S.users.find(x=>x.email===em); if(!u||u.email==='admin@lebonplan.fr') return;
-  u.role = u.role==='admin'?'user':'admin';
-  if (S.user?.email===em) { S.user.role = u.role; updateAuthUI(); }
-  addLog('inf',`${u.name} est maintenant ${u.role}`);
-  saveSt(); renderAdmUsers(); toast(`${u.name} : rôle mis à jour`,'ok');
+  const u = S.users.find(x => x.email === em);
+  if (!u || u.email === 'admin@lebonplan.fr') return;
+  const willAdmin = u.role !== 'admin';
+  requireSave(
+    `${willAdmin ? 'Donner les droits admin à' : 'Retirer les droits admin de'} ${u.name} ?`,
+    () => {
+      u.role = willAdmin ? 'admin' : 'user';
+      if (S.user?.email === em) { S.user.role = u.role; updateAuthUI(); }
+      addLog('inf', `${u.name} : rôle changé en ${u.role} par ${window._staffRole||'admin'}`);
+      saveSt(); renderAdmUsers();
+      toast(`${u.name} : rôle mis à jour`, 'ok');
+    },
+    willAdmin ? 'Donner admin' : 'Retirer admin'
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2365,17 +2515,46 @@ function loadSettings() {
   updateSiteStatusDisplay();
 }
 function toggleSetting(key, btn) {
+  const newVal = !btn.classList.contains('on');
+  if (key === 'maintenance') {
+    if (newVal) {
+      // Mettre le toggle ON visuellement immédiatement
+      btn.classList.add('on');
+      requireSave(
+        '⚠️ Activer le mode maintenance rendra le site inaccessible au public. Confirmer ?',
+        () => {
+          S.settings.maintenance = true;
+          saveSt();
+          applyMaintenanceMode();
+          toast('⚠️ Mode maintenance activé', 'err');
+          addLog('wrn', 'Mode maintenance activé par ' + (window._staffRole||'admin'));
+        },
+        'Activer maintenance'
+      );
+      // Si annulé, remettre OFF — géré par dismissSaveConfirm via le cancel
+      const origDismiss = _onDismiss;
+      _onDismiss = () => {
+        btn.classList.remove('on');
+        _onDismiss = origDismiss;
+      };
+      return;
+    } else {
+      btn.classList.remove('on');
+      S.settings.maintenance = false;
+      saveSt();
+      applyMaintenanceMode();
+      toast('Mode maintenance désactivé ✓', 'ok');
+      addLog('inf', 'Mode maintenance désactivé par ' + (window._staffRole||'admin'));
+      return;
+    }
+  }
   btn.classList.toggle('on');
   S.settings[key] = btn.classList.contains('on');
-  if (key === 'maintenance') {
-    applyMaintenanceMode();
-    toast(S.settings.maintenance ? '⚠️ Mode maintenance activé' : 'Mode maintenance désactivé', S.settings.maintenance ? 'err' : 'ok');
-  }
   saveSt();
 }
 
 function applyMaintenanceMode() {
-  const isAdmin = S.user && S.user.role === 'admin';
+  const isAdmin = S.adminUser || (S.user && S.user.role === 'admin');
   const maintBanner = document.getElementById('maintBanner');
   if (S.settings.maintenance) {
     if (!isAdmin) {
@@ -2457,13 +2636,19 @@ function bypassMaintenance() {
   go('admin');
 }
 function saveSettings() {
-  ['maxPhotos','pubDuration','loginLimit','sessionHours'].forEach(k => {
-    const inp = document.getElementById('inp-'+k);
-    if (inp) S.settings[k] = parseInt(inp.value) || S.settings[k];
-  });
-  saveSt();
-  addLog('inf', 'Paramètres sauvegardés par admin');
-  toast('Paramètres sauvegardés ✓', 'ok');
+  requireSave(
+    'Sauvegarder tous les paramètres de la plateforme ?',
+    () => {
+      ['maxPhotos','pubDuration','loginLimit','sessionHours'].forEach(k => {
+        const inp = document.getElementById('inp-'+k);
+        if (inp) S.settings[k] = parseInt(inp.value) || S.settings[k];
+      });
+      saveSt();
+      addLog('inf', 'Paramètres sauvegardés par ' + (window._staffRole||'admin'));
+      toast('Paramètres sauvegardés ✓', 'ok');
+    },
+    'Sauvegarder paramètres'
+  );
 }
 function exportSettings() {
   const data = {
@@ -2685,10 +2870,16 @@ function toggleContactStatus(id) {
 }
 
 function deleteContact(id) {
-  if (!confirm('Supprimer ce message ?')) return;
-  S.contacts = S.contacts.filter(c => c.id !== id);
-  saveSt(); renderAdmContacts();
-  toast('Message supprimé', 'ok');
+  const c = S.contacts.find(x => x.id === id);
+  requireSave(
+    `Supprimer le message de ${c?.name||'cet utilisateur'} (${c?.subject||''}) ?`,
+    () => {
+      S.contacts = S.contacts.filter(c => c.id !== id);
+      saveSt(); renderAdmContacts();
+      toast('Message supprimé', 'ok');
+    },
+    'Supprimer'
+  );
 }
 
 function updateContactBadge() {
@@ -2814,10 +3005,17 @@ function toggleAnn(id) {
   if (a) { a.active=!a.active; saveSt(); renderAnnouncements(); applyAnnouncements(); }
 }
 function deleteAnn(id) {
-  if (!confirm('Supprimer cette annonce ?')) return;
-  S.announcements = S.announcements.filter(x=>x.id!==id);
-  saveSt(); renderAnnouncements(); applyAnnouncements();
-  toast('Supprimée', 'ok');
+  const a = S.announcements.find(x=>x.id===id);
+  requireSave(
+    `Supprimer l'annonce "${a?.msg||''}" ?`,
+    () => {
+      S.announcements = S.announcements.filter(x=>x.id!==id);
+      saveSt(); renderAnnouncements(); applyAnnouncements();
+      toast('Annonce supprimée', 'ok');
+      addLog('inf', `Annonce admin supprimée par ${window._staffRole||'admin'}`);
+    },
+    'Supprimer annonce'
+  );
 }
 function applyAnnouncements() {
   // Remove existing
@@ -2864,25 +3062,53 @@ function applyAnnouncements() {
 }
 
 // ═══ ADMIN SITE — show login or dashboard directly ═══
+let selectedStaffType = null; // 'admin', 'moderateur', 'dev', 'direction'
+
+// Permissions par rôle
+const STAFF_PERMISSIONS = {
+  admin:      ['dashboard','ads','reports','reviews','users','messages','contacts','announcements','staff','system','logs','settings'],
+  direction:  ['dashboard','ads','reports','reviews','users','messages','contacts','announcements','staff','logs'],
+  moderateur: ['dashboard','ads','reports','reviews','messages','contacts'],
+  dev:        ['dashboard','ads','system','logs','settings','announcements'],
+};
+// Labels staff
+const STAFF_ROLE_LABELS = { admin:'👑 Direction / Admin', direction:'👔 Direction', moderateur:'🛡 Modérateur', dev:'💻 Développeur' };
+
+function selectStaffType(type, btn) {
+  selectedStaffType = type;
+  document.querySelectorAll('.staff-type-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('alStep2').style.display = 'block';
+  document.getElementById('alErr').style.display = 'none';
+  setTimeout(() => document.getElementById('alEmail')?.focus(), 80);
+}
+function resetStaffTypeSelection() {
+  selectedStaffType = null;
+  document.querySelectorAll('.staff-type-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('alStep2').style.display = 'none';
+  document.getElementById('alEmail').value = '';
+  document.getElementById('alPw').value = '';
+}
+
 function initAdminSite() {
-  // If already logged in as admin, go straight to dashboard
-  if (S.user && S.user.role === 'admin') {
+  const au = S.adminUser;
+  if (au && (au.role === 'admin' || au.staffRole || au.isStaff)) {
     document.body.style.visibility = 'visible';
     document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
     const ap = document.getElementById('page-admin');
     if (ap) ap.classList.add('on');
+    applyStaffPermissions(au);
+    updateAdminUserBar();
     renderDash(); renderAdmAds(); renderAdmRep(); renderAdmUsers();
     renderAdmRev(); renderAdmMsg(); renderAdmContacts(); renderAnnouncements(); renderStaff(); renderLogs();
     setTimeout(loadSettings, 50);
     return;
   }
-  // Show full-screen admin login
   document.body.style.visibility = 'visible';
   showAdminLogin();
 }
 
 function showAdminLogin() {
-  // Hide everything, show only the admin login overlay
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   const overlay = document.getElementById('adminLoginOverlay');
   if (overlay) overlay.style.display = 'flex';
@@ -2896,20 +3122,67 @@ function doAdminLogin() {
   const limitMsg = checkLoginRateLimit();
   if (limitMsg) { err.textContent = limitMsg; err.style.display = 'block'; return; }
   if (!em || !pw) { err.textContent = 'Remplissez tous les champs.'; err.style.display = 'block'; return; }
-  const u = S.users.find(x => x.email === em && x.password === pw);
+  if (!selectedStaffType) { err.textContent = 'Sélectionnez votre type de staff.'; err.style.display = 'block'; return; }
+
+  // Try to find user: email, or staff username (@xxx or xxx)
+  let u = null;
+  const cleanEm = em.replace(/^@/, '');
+
+  // Check admin users first (email match)
+  u = S.users.find(x => x.email === em && x.password === pw);
+
+  // Check staff accounts (email or username)
+  if (!u) {
+    const sm = S.staff.find(x =>
+      (x.email === em || x.username === cleanEm) && x.pw === pw
+    );
+    if (sm) {
+      // Wrap as a user-like object with staffRole
+      u = {
+        id: sm.id,
+        name: sm.first + ' ' + sm.last,
+        first: sm.first,
+        last: sm.last,
+        email: sm.email,
+        role: 'staff',
+        staffRole: sm.role,
+        init: sm.first[0]?.toUpperCase() || '?',
+        username: sm.username,
+        isStaff: true,
+      };
+    }
+  }
+
   if (!u) {
     recordFailedLogin();
     err.textContent = 'Identifiants incorrects.'; err.style.display = 'block';
     addLog('wrn', 'Tentative connexion admin échouée : ' + em);
     return;
   }
-  if (u.role !== 'admin') { err.textContent = 'Accès réservé aux administrateurs.'; err.style.display = 'block'; return; }
+
+  // Validate that selected type matches actual role
+  const actualRole = u.staffRole || u.role; // 'admin', 'moderateur', 'dev', 'direction'
+  const typeToRole = { admin: 'admin', direction: 'direction', moderateur: 'moderateur', dev: 'dev' };
+  const expectedRole = typeToRole[selectedStaffType];
+
+  if (actualRole !== expectedRole && !(actualRole === 'admin' && selectedStaffType === 'admin')) {
+    err.textContent = `Ce compte n'est pas un compte "${STAFF_ROLE_LABELS[selectedStaffType]}".`;
+    err.style.display = 'block';
+    addLog('wrn', `Mauvais type de staff sélectionné pour : ${em}`);
+    return;
+  }
+
   if (u.status === 'banned') { err.textContent = 'Compte suspendu.'; err.style.display = 'block'; return; }
   resetLoginAttempts();
-  S.user = { ...u };
+
+  // Store as admin session (not visible on main site)
+  S.adminUser = { ...u };
+  S.user = S.user; // keep main site user unchanged
   saveSt();
+
   document.getElementById('adminLoginOverlay').style.display = 'none';
-  updateAuthUI();
+  applyStaffPermissions(u);
+  updateAdminUserBar();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   const ap = document.getElementById('page-admin');
   if (ap) ap.classList.add('on');
@@ -2917,7 +3190,125 @@ function doAdminLogin() {
   renderAdmRev(); renderAdmMsg(); renderAdmContacts(); renderAnnouncements(); renderStaff(); renderLogs();
   setTimeout(loadSettings, 50);
   toast('Bienvenue ' + (u.first || u.name) + ' !', 'ok');
-  addLog('inf', 'Connexion admin : ' + em);
+  addLog('inf', `Connexion panel [${STAFF_ROLE_LABELS[actualRole]||actualRole}] : ${u.email||u.username||em}`);
+}
+
+function updateAdminUserBar() {
+  const u = S.adminUser || S.user;
+  if (!u) return;
+  const avEl = document.getElementById('admUserAv');
+  const nmEl = document.getElementById('admUserNm');
+  const roleEl = document.getElementById('admUserRole');
+  if (!avEl) return;
+  avEl.textContent = u.init || (u.first ? u.first[0].toUpperCase() : '?');
+  if (u.picture) avEl.innerHTML = `<img src="${u.picture}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  nmEl.textContent = u.name || (u.first + ' ' + u.last);
+  const role = u.staffRole || u.role;
+  roleEl.textContent = STAFF_ROLE_LABELS[role] || role;
+}
+
+function applyStaffPermissions(u) {
+  const role = u.staffRole || u.role;
+  const perms = STAFF_PERMISSIONS[role] || STAFF_PERMISSIONS['moderateur'];
+  // Nav items that can be restricted
+  const navMap = {
+    dashboard: 'nav-dashboard',
+    ads: 'nav-ads',
+    reports: 'navReports',
+    reviews: 'nav-reviews',
+    users: 'nav-users',
+    messages: 'nav-messages',
+    contacts: 'navContacts',
+    announcements: 'nav-announcements',
+    staff: 'nav-staff',
+    system: 'nav-system',
+    logs: 'nav-logs',
+    settings: 'nav-settings',
+  };
+  Object.entries(navMap).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const allowed = perms.includes(key);
+    el.style.display = allowed ? '' : 'none';
+    el.style.opacity = allowed ? '' : '0.3';
+    el.style.pointerEvents = allowed ? '' : 'none';
+  });
+  // Hide section separators if all items in section are hidden
+  const sepEquipe = document.getElementById('sepEquipe');
+  const sepSysteme = document.getElementById('sepSysteme');
+  if (sepEquipe) sepEquipe.style.display = perms.includes('staff') ? '' : 'none';
+  if (sepSysteme) sepSysteme.style.display = (perms.includes('system') || perms.includes('logs') || perms.includes('settings')) ? '' : 'none';
+
+  // Store current permissions
+  window._staffPerms = perms;
+  window._staffRole = role;
+}
+
+function canDo(action) {
+  if (!window._staffPerms) return true; // default allow for admin
+  return window._staffPerms.includes(action);
+}
+
+function adminLogout() {
+  if (!confirm('Se déconnecter du panel ?')) return;
+  S.adminUser = null;
+  saveSt();
+  selectedStaffType = null;
+  window._staffPerms = null;
+  window._staffRole = null;
+  document.querySelectorAll('.staff-type-btn').forEach(b => b.classList.remove('sel'));
+  resetStaffTypeSelection();
+  showAdminLogin();
+  toast('Déconnecté du panel', 'ok');
+  addLog('inf', 'Déconnexion panel admin');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAVE CONFIRM EMBED — système de confirmation pour toutes actions
+// ═══════════════════════════════════════════════════════════
+let _pendingAction = null;
+let _pendingSave = null;
+let _onDismiss = null;
+
+function requireSave(msg, saveFn, actionLabel) {
+  // Clear any previous pending action/timer
+  if (_pendingSave) clearTimeout(_pendingSave);
+  _pendingAction = saveFn;
+  const msgEl = document.getElementById('saveConfirmMsg');
+  const okBtn = document.getElementById('saveConfirmOkBtn');
+  const embed = document.getElementById('saveConfirmEmbed');
+  if (!msgEl || !okBtn || !embed) {
+    // Fallback: execute directly if embed not found
+    if (saveFn) saveFn();
+    return;
+  }
+  msgEl.textContent = msg || 'Voulez-vous sauvegarder ces modifications ?';
+  okBtn.textContent = '💾 ' + (actionLabel || 'Sauvegarder');
+  embed.style.display = 'block';
+  // Auto-dismiss after 20s
+  _pendingSave = setTimeout(() => { _pendingAction = null; dismissSaveConfirm(); }, 20000);
+}
+
+function executePendingAction(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  _onDismiss = null; // annuler le callback d'annulation si on confirme
+  dismissSaveConfirm();
+  if (_pendingAction) {
+    const fn = _pendingAction;
+    _pendingAction = null;
+    try { fn(); } catch(err) { console.error('requireSave action error:', err); }
+  }
+}
+
+function dismissSaveConfirm(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const el = document.getElementById('saveConfirmEmbed');
+  if (el) el.style.display = 'none';
+  if (_pendingSave) clearTimeout(_pendingSave);
+  _pendingSave = null;
+  _pendingAction = null;
+  // Appeler le callback d'annulation si défini (ex: remettre toggle OFF)
+  if (_onDismiss) { try { _onDismiss(); } catch(err) {} _onDismiss = null; }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2995,40 +3386,52 @@ function saveStaff() {
 
   if (!first || !last || !username || !email || !pw) { toast('Remplissez tous les champs obligatoires', 'err'); return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Email invalide', 'err'); return; }
-
   if (!editId && S.staff.find(x => x.username === username)) { toast('Cet identifiant est déjà utilisé', 'err'); return; }
   if (!editId && S.staff.find(x => x.email === email)) { toast('Cet email est déjà utilisé', 'err'); return; }
 
   const data = { first, last, username, email, pw, role, notes, updatedAt: new Date().toLocaleDateString('fr-FR') };
+  const isNew = !editId;
+  const roleLabel = ROLE_LABELS[role] || role;
 
-  if (editId) {
-    const m = S.staff.find(x => x.id === editId);
-    if (m) Object.assign(m, data);
-    toast('Membre mis à jour ✓', 'ok');
-  } else {
-    S.staff.push({ id: 'staff_' + Date.now(), createdAt: new Date().toLocaleDateString('fr-FR'), ...data });
-    toast('Membre créé ✓', 'ok');
-    addLog('inf', 'Nouveau staff : ' + username + ' (' + role + ')');
-  }
-
-  saveSt();
-  renderStaff();
-  document.getElementById('staffForm').style.display = 'none';
+  requireSave(
+    isNew
+      ? `Créer le compte staff ${first} ${last} (@${username}) — ${roleLabel} ?`
+      : `Modifier le compte de ${first} ${last} (@${username}) ?`,
+    () => {
+      if (editId) {
+        const m = S.staff.find(x => x.id === editId);
+        if (m) Object.assign(m, data);
+        addLog('inf', `Staff modifié : @${username} (${role}) par ${window._staffRole||'admin'}`);
+      } else {
+        S.staff.push({ id: 'staff_' + Date.now(), createdAt: new Date().toLocaleDateString('fr-FR'), ...data });
+        addLog('inf', `Nouveau staff créé : @${username} (${role}) par ${window._staffRole||'admin'}`);
+      }
+      saveSt();
+      renderStaff();
+      document.getElementById('staffForm').style.display = 'none';
+      toast(isNew ? 'Membre créé ✓' : 'Membre mis à jour ✓', 'ok');
+    },
+    isNew ? 'Créer le membre' : 'Sauvegarder'
+  );
 }
 
 function deleteStaff(id) {
   const m = S.staff.find(x => x.id === id);
   if (!m) return;
-  if (!confirm('Supprimer ' + m.first + ' ' + m.last + ' ?')) return;
-  S.staff = S.staff.filter(x => x.id !== id);
-  saveSt(); renderStaff();
-  toast('Membre supprimé', 'ok');
-  addLog('wrn', 'Staff supprimé : ' + m.username);
+  requireSave(
+    `Supprimer définitivement le compte de ${m.first} ${m.last} (@${m.username}) ?`,
+    () => {
+      S.staff = S.staff.filter(x => x.id !== id);
+      saveSt(); renderStaff();
+      toast('Membre supprimé', 'ok');
+      addLog('wrn', `Staff supprimé : @${m.username} par ${window._staffRole||'admin'}`);
+    },
+    'Supprimer membre'
+  );
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   // Google setup
-  // GCID hardcoded — update admin display
   const gcidEl = document.getElementById('gcidShow');
   if (gcidEl) gcidEl.textContent = GCID.substring(0, 40) + '…';
   const gcidInp = document.getElementById('gcidInput');
@@ -3039,16 +3442,23 @@ document.addEventListener('DOMContentLoaded', () => {
     S.users.unshift(ADMIN_USER);
     saveSt();
   }
+  // NE PAS connecter l'utilisateur site ici pour le panel
   updateAuthUI();
   buildCats();
   renderHome();
   if (!S.logs.length) addLog('inf', 'Plateforme LeBonPlan démarrée');
   loadSettings();
-
-  // Admin site: no maintenance blocking
-
   applyAnnouncements();
+
   // Admin site: show login or dashboard
+  // Restore adminUser session if exists
+  if (S.adminUser) {
+    const au = S.adminUser;
+    applyStaffPermissions(au);
+    updateAdminUserBar();
+    window._staffRole = au.staffRole || au.role;
+    window._staffPerms = STAFF_PERMISSIONS[window._staffRole] || STAFF_PERMISSIONS['moderateur'];
+  }
   initAdminSite();
 
   window.addEventListener('scroll',()=>document.querySelector('header')?.classList.toggle('scrolled',window.scrollY>2),{passive:true});
